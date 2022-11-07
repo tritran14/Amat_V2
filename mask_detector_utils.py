@@ -6,6 +6,7 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 import tensorflow as tf
+from utils import *
 
 cascPathface = os.path.dirname(
     cv2.__file__) + "/data/haarcascade_frontalface_default.xml"
@@ -36,6 +37,8 @@ def detect(frame):
 
     face_status_list = []
 
+    brightness_status_message = get_brightness_status_message(frame)
+
     # histogram equalize 
     img_yuv = cv2.cvtColor(frame,cv2.COLOR_BGR2YUV)
     img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
@@ -47,7 +50,7 @@ def detect(frame):
 
     # face detect with haar 
     faces = faceCascade.detectMultiScale(gray,
-                                         scaleFactor=1.1,
+                                         scaleFactor=1.3,
                                          minNeighbors=5,
                                          minSize=(60, 60),
                                          flags=cv2.CASCADE_SCALE_IMAGE)
@@ -131,88 +134,29 @@ def detect(frame):
 
         face_status = FaceStatus(face_detection, face_item)
         face_status_list.append(face_status)
+        face_status.set_brightness_status(brightness_status_message)
 
-    return face_status
+    return face_status_list
         
 
-
-
-class Poi:
-    def __init__(self,x,y):
-        self.x = int(x)
-        self.y = int(y)
-    def __iter__(self):
-        yield 'x', int(self.x)
-        yield 'y', int(self.y)
-
-class DetectionArea:
-    def __init__(self,left_top, right_bottom):
-        self.left_top = left_top
-        self.right_bottom = right_bottom
-    def __iter__(self):
-        yield 'left_top', dict(self.left_top)
-        yield 'right_bottom', dict(self.right_bottom)
-
-class FaceDetection:
-    
-    def set_mouth_area(self, mouth_area_list):
-        self.mouth_area_list = mouth_area_list
-    def has_mouth(self):
-        return len(self.mouth_area_list) > 0
-    
-    def set_nose_area(self, nose_area_list):
-        self.nose_area_list = nose_area_list
-    def has_nose(self):
-        return len(self.nose_area_list) > 0
-    
-    def set_eyes_area(self, eyes_area_list):
-        self.eyes_area_list = eyes_area_list
-    def has_eyes(self):
-        return len(self.eyes_area_list) >= 2
-    
-    def valid_face(self):
-        return self.has_eyes() and self.has_mouth() and self.has_nose()
-    
-    def __iter__(self):
-        yield 'mouth_area_list', [dict(x) for x in self.mouth_area_list]
-        yield 'nose_area_list', [dict(x) for x in self.nose_area_list]
-        yield 'eyes_area_list', [dict(x) for x in self.eyes_area_list]
-
-class FaceItem:
-    glasses_label = ['Glasses', 'No glasses']
-    mask_label = ['Mask', 'No mask']
-
-    def set_mask(self, value):
-        self.mask = value
-    def set_glasses(self, value):
-        self.glasses = value
-    
-    def has_mask(self):
-        return self.mask
-    def has_glasses(self):
-        return self.glasses
-    
-    def has_glasses_str(self):
-        idx = 0 if self.has_glasses() else 1
-        return self.glasses_label[idx]
-    def has_mask_str(self):
-        idx = 0 if self.has_mask() else 1
-        return self.mask_label[idx]
-
-    def is_clean_face(self):
-        return not self.has_mask() and not self.has_glasses()
-    
-    def __iter__(self):
-        yield 'mask', bool(self.mask)
-        yield 'glasses', bool(self.glasses)
-    
-class FaceStatus:
-    def __init__(self, face_detection, face_item):
-        self.face_detection = face_detection
-        self.face_item = face_item
-    def good_face(self):
-        return self.face_detection.valid_face() and self.face_item.is_clean_face()
-    
-    def __iter__(self):
-        yield 'face_detection', dict(self.face_detection)
-        yield 'face_item', dict(self.face_item)
+def get_brightness_status_message(frame):
+    bright_thres = 0.65
+    dark_thres = 0.65
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    print("[INFO] performing histogram equalization...")
+    equalized = cv2.equalizeHist(gray)
+    dark_part = cv2.inRange(gray, 0, 30)
+    bright_part = cv2.inRange(gray, 220, 255)
+    total_pixel = np.size(gray)
+    dark_pixel = np.sum(dark_part > 0)
+    bright_pixel = np.sum(bright_part > 0)
+    found = False
+    if dark_pixel/total_pixel > bright_thres:
+        ans = -1
+        found = True
+    if bright_pixel/total_pixel > dark_thres:
+        ans = 1
+        found = True
+    if not found:
+        ans = 0
+    return ans
