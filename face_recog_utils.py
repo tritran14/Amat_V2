@@ -24,7 +24,7 @@ with tf.Graph().as_default():
     with sess.as_default():
         pnet, rnet, onet = detect_face.create_mtcnn(sess, npy)
         minsize = 30  # minimum size of face
-        threshold = [0.7,0.8,0.8]  # three steps's threshold
+        threshold = [0.6,0.7,0.7]  # three steps's threshold
         factor = 0.709  # scale factor
         margin = 44
         batch_size =100 #1000
@@ -49,9 +49,17 @@ def recog_face(frame):
     face_list = []
     if frame.ndim == 2:
         frame = facenet.to_rgb(frame)
+    
+    img_yuv = cv2.cvtColor(frame,cv2.COLOR_BGR2YUV)
+    img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+    hist_eq = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+
+    frame = hist_eq
+
     bounding_boxes, _ = detect_face.detect_face(frame, minsize, pnet, rnet, onet, threshold, factor)
     faceNum = bounding_boxes.shape[0]
     if faceNum > 0:
+        print('have a face')
         det = bounding_boxes[:, 0:4]
         img_size = np.asarray(frame.shape)[0:2]
         cropped = []

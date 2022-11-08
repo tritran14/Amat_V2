@@ -9,6 +9,12 @@ import tensorflow as tf
 from utils import *
 
 cascPathface = os.path.dirname(
+    cv2.__file__) + "/data/haarcascade_frontalface_alt_tree.xml"
+cascPathface1 = os.path.dirname(
+    cv2.__file__) + "/data/haarcascade_frontalface_alt.xml"
+cascPathface2 = os.path.dirname(
+    cv2.__file__) + "/data/haarcascade_frontalface_alt2.xml"
+cascPathface3 = os.path.dirname(
     cv2.__file__) + "/data/haarcascade_frontalface_default.xml"
 # cascPatheyes = os.path.dirname(
 #     cv2.__file__) + "/data/haarcascade_eye_tree_eyeglasses.xml"
@@ -24,6 +30,10 @@ cascNose = os.path.dirname(
 data = []
 
 faceCascade = cv2.CascadeClassifier(cascPathface)
+faceCascade1 = cv2.CascadeClassifier(cascPathface1)
+faceCascade2 = cv2.CascadeClassifier(cascPathface2)
+faceCascade3 = cv2.CascadeClassifier(cascPathface3)
+
 mouthCascade = cv2.CascadeClassifier(cascMouth)
 eyesCascade = cv2.CascadeClassifier(cascEyes)
 noseCascade = cv2.CascadeClassifier(cascNose)
@@ -39,14 +49,23 @@ def detect(frame):
 
     brightness_status_message = get_brightness_status_message(frame)
 
-    # histogram equalize 
-    img_yuv = cv2.cvtColor(frame,cv2.COLOR_BGR2YUV)
-    img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
-    hist_eq = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+    width = len(frame)
+    height = len(frame[0])
 
-    # convert to gray 
-    gray = cv2.cvtColor(hist_eq, cv2.COLOR_BGR2GRAY)
-    new_img = cv2.cvtColor(hist_eq, cv2.COLOR_RGB2BGR)
+    # norm_img = np.zeros((width, height))
+    # frame = cv2.normalize(frame, norm_img, 0, 255, cv2.NORM_MINMAX)
+
+    # histogram equalize 
+    # img_yuv = cv2.cvtColor(frame,cv2.COLOR_BGR2YUV)
+    # img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+    # hist_eq = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+
+    # # convert to gray 
+    # gray = cv2.cvtColor(hist_eq, cv2.COLOR_BGR2GRAY)
+    # new_img = cv2.cvtColor(hist_eq, cv2.COLOR_RGB2BGR)
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.equalizeHist(gray)
 
     # face detect with haar 
     faces = faceCascade.detectMultiScale(gray,
@@ -54,6 +73,30 @@ def detect(frame):
                                          minNeighbors=5,
                                          minSize=(60, 60),
                                          flags=cv2.CASCADE_SCALE_IMAGE)
+    
+    if len(faces) == 0:
+        faces = faceCascade1.detectMultiScale(gray,
+                                         scaleFactor=1.3,
+                                         minNeighbors=5,
+                                         minSize=(60, 60),
+                                         flags=cv2.CASCADE_SCALE_IMAGE)
+    if len(faces) == 0:
+        faces = faceCascade2.detectMultiScale(gray,
+                                         scaleFactor=1.3,
+                                         minNeighbors=5,
+                                         minSize=(60, 60),
+                                         flags=cv2.CASCADE_SCALE_IMAGE)
+    if len(faces) == 0:
+        faces = faceCascade3.detectMultiScale(gray,
+                                         scaleFactor=1.3,
+                                         minNeighbors=5,
+                                         minSize=(60, 60),
+                                         flags=cv2.CASCADE_SCALE_IMAGE)
+    if len(faces) > 0:
+        print('detected face')
+    else:
+        print('dont have')
+
     for (x,y,w,h) in faces:
 
         face_detection = FaceDetection()

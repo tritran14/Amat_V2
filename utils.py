@@ -1,3 +1,6 @@
+from time import time
+from math import floor
+
 class Poi:
     def __init__(self,x,y):
         self.x = int(x)
@@ -97,3 +100,23 @@ class FaceRecognize:
         yield 'name', self.name
         yield 'accuracy', self.accuracy
         yield 'face_area', dict(self.face_area)
+
+class UserIdentity:
+    def __init__(self, id, name, accuracy):
+        self.id = id
+        self.name = name
+        self.accuracy = accuracy
+        self.currentTime = int(time() * 1000)
+    def __iter__(self):
+        yield 'id', self.id
+        yield 'name', self.name
+        yield 'accuracy', self.accuracy
+        yield 'currentTime', self.currentTime
+
+class ResponseMessage:
+    def __init__(self, success, message):
+        self.success = success
+        self.message = message
+    def __iter__(self):
+        yield 'success', self.success
+        yield 'message', self.message
