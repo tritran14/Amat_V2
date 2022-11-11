@@ -27,6 +27,12 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 totImg = 10
 freqAccuracyThreshold = 0.8
 totRegisterImg = 5
+maskThreshold = 0.5
+glassesThreshold = 0.5
+eyesThreshold = 0.5
+mouthThreshold = 0.5
+noseThreshold = 0.5
+
 
 def convertBase64ToCV2Image(im_b64):
     im_bytes = base64.b64decode(im_b64)
@@ -72,9 +78,28 @@ def recogFace(base64List):
     return userIdentity
 
 def getResponseMessage(base64List):
+    
+    removeMessagePattern = "Pls remove {} on you face"
+    cantDetectMessagePattern = "I can't see your {}"
+    message = ""
+    goodMessage = "Naice face"
+
+    maskMessage = "mask"
+    glassesMessage = "glasses"
+    eyesMessage = "eyes"
+    mouthMessage = "mouth"
+    noseMessage = "nose"
+
     faceStatusList = []
     cnt = 0
     print('start with ', len(base64List))
+
+    maskCnt = 0
+    glassesCnt = 0
+    eyesCnt = 0
+    mouthCnt = 0
+    noseCnt = 0
+
     for base64 in base64List:
         value = base64['value']
         if value is None: continue
@@ -85,8 +110,50 @@ def getResponseMessage(base64List):
         faceStatusList.append(faceStatus)
         if len(faceStatus) > 0:
             cnt += 1
-        
+            maskCnt += faceStatus[0].face_item.mask == True
+            glassesCnt += faceStatus[0].face_item.glasses == True
+            eyesCnt += faceStatus[0].face_detection.has_eyes()
+            mouthCnt += faceStatus[0].face_detection.has_mouth()
+            noseCnt += faceStatus[0].face_detection.has_nose()
+    
+    maskRatio = maskCnt / cnt
+    glassesRatio = glassesCnt / cnt
+    eyesRatio = eyesCnt / cnt
+    mouthRatio = mouthCnt / cnt
+    noseRatio = noseCnt / cnt
+
+    feature = []
+    if eyesRatio < eyesThreshold:
+        feature.append(eyesMessage)
+    if mouthRatio < mouthThreshold:
+        feature.append(mouthMessage)
+    if noseRatio < noseThreshold:
+        feature.append(noseMessage)
+    
+    item = []
+
+    if maskRatio >= maskThreshold:
+        item.append(maskMessage)
+    if glassesRatio >= glassesThreshold:
+        item.append(glassesMessage)
+    
+    if len(feature) > 0:
+        delimiter = ""
+        if(len(message) > 0): 
+            delimiter = " and "
+        message = message + delimiter + cantDetectMessagePattern.format(', '.join(feature))
+
+    if len(item) > 0:
+        delimiter = ""
+        if(len(message) > 0): 
+            delimiter = " and "
+        message = message + delimiter + removeMessagePattern.format(', '.join(item))
+
+
     print('cnt : ', cnt)
+    print("mask cnt : {}".format(maskCnt))
+    print("glasses cnt : {}".format(glassesCnt))
+    print("message : {}".format(message))
     return faceStatusList
 
 ########################################################################################################
