@@ -113,10 +113,10 @@ class UserIdentity:
         yield 'accuracy', self.accuracy
         yield 'currentTime', self.currentTime
 
-class ResponseMessage:
-    def __init__(self, success, message):
-        self.success = success
+class ResponseData:
+    def __init__(self, validImage, message):
+        self.validImage = validImage
         self.message = message
     def __iter__(self):
-        yield 'success', self.success
+        yield 'validImage', [dict(x) for x in self.validImage]
         yield 'message', self.message

@@ -8,8 +8,9 @@ import cv2 as cv2
 from face_recog_utils import recog_face
 import base64
 import operator
+import save_file
 
-from utils import UserIdentity
+from utils import ResponseData, UserIdentity
 
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
@@ -77,8 +78,7 @@ def recogFace(base64List):
         print("don't have face")
     return userIdentity
 
-def getResponseMessage(base64List):
-    
+def getResponseData(base64List):
     removeMessagePattern = "Pls remove {} on you face"
     cantDetectMessagePattern = "I can't see your {}"
     message = ""
@@ -100,6 +100,8 @@ def getResponseMessage(base64List):
     mouthCnt = 0
     noseCnt = 0
 
+    validImage = []
+
     for base64 in base64List:
         value = base64['value']
         if value is None: continue
@@ -112,10 +114,12 @@ def getResponseMessage(base64List):
             cnt += 1
             maskCnt += faceStatus[0].face_item.mask == True
             glassesCnt += faceStatus[0].face_item.glasses == True
-            eyesCnt += faceStatus[0].face_detection.has_eyes()
-            mouthCnt += faceStatus[0].face_detection.has_mouth()
-            noseCnt += faceStatus[0].face_detection.has_nose()
-    
+            eyesCnt += faceStatus[0].face_detection.has_eyes() == True
+            mouthCnt += faceStatus[0].face_detection.has_mouth() == True
+            noseCnt += faceStatus[0].face_detection.has_nose() == True
+            if faceStatus[0].good_face():
+                validImage.append(base64)
+
     maskRatio = maskCnt / cnt
     glassesRatio = glassesCnt / cnt
     eyesRatio = eyesCnt / cnt
@@ -137,24 +141,34 @@ def getResponseMessage(base64List):
     if glassesRatio >= glassesThreshold:
         item.append(glassesMessage)
     
+    found = False
+
     if len(feature) > 0:
         delimiter = ""
         if(len(message) > 0): 
             delimiter = " and "
         message = message + delimiter + cantDetectMessagePattern.format(', '.join(feature))
+        found = True
 
     if len(item) > 0:
         delimiter = ""
         if(len(message) > 0): 
             delimiter = " and "
         message = message + delimiter + removeMessagePattern.format(', '.join(item))
+        found = True
 
+    if not found:
+        message = goodMessage
 
     print('cnt : ', cnt)
     print("mask cnt : {}".format(maskCnt))
     print("glasses cnt : {}".format(glassesCnt))
     print("message : {}".format(message))
-    return faceStatusList
+    return ResponseData(validImage, message)
+
+def train_data():
+    import data_proccess
+    import train_main
 
 ########################################################################################################
 
@@ -220,8 +234,24 @@ def register():
     if request.method == 'POST':
         if request.data is not None:
             base64List = json.loads(request.data)
-            getResponseMessage(base64List)
-            return jsonify({'hello':'world'}), 200
+            data = getResponseData(base64List)
+            dataDict = dict(data)
+            return jsonify(dataDict), 200
+    return "Bad request", 400
+
+@app.route('/upload-face', methods=['POST'])
+@cross_origin()
+def upload_face():
+    if request.method == 'POST':
+        if request.data is not None:
+            userImage = json.loads(request.data)
+            userId = userImage["id"]
+            base64List = userImage["base64List"]
+            print(userId)
+            save_file.create_dir(userId, base64List)
+            train_data()
+            
+            return {"hello":"world"}, 200
     return "Bad request", 400
 
 app.run(debug=True, host='0.0.0.0', port=5050)
