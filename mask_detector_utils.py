@@ -7,7 +7,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 import tensorflow as tf
 from utils import *
-
+from load_model import faceNet, confidence_threshold
 # cascPathface = os.path.dirname(
 #     cv2.__file__) + "/data/haarcascade_frontalface_alt_tree.xml"
 # cascPathface1 = os.path.dirname(
@@ -43,11 +43,6 @@ glasses_model = load_model("glassesnet_test.h5")
 mask_label = {0:'MASK',1:'NO MASK'}
 dist_label = {0:(0,255,0),1:(255,0,0)}
 
-print("[INFO] loading face detector model...")
-prototxtPath = "face_detector/deploy.prototxt.txt"
-weightsPath = "face_detector/res10_300x300_ssd_iter_140000.caffemodel"
-faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
-confidence_threshold = 0.5
 
 def detect(frame):
 

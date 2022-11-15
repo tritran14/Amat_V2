@@ -245,11 +245,11 @@ def upload_face():
     if request.method == 'POST':
         if request.data is not None:
             userImage = json.loads(request.data)
-            userId = userImage["id"]
+            userId = userImage["username"]
             base64List = userImage["base64List"]
             print(userId)
-            save_file.create_dir(userId, base64List)
-            train_data()
+            # save_file.create_dir(userId, base64List)
+            # train_data()
             
             return {"hello":"world"}, 200
     return "Bad request", 400
