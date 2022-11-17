@@ -59,4 +59,4 @@ class training:
                 # Saving model
                 with open(classifier_file_name, 'wb') as outfile:
                     pickle.dump((model, class_names), outfile)
-                return classifier_file_name
+                return 

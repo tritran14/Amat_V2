@@ -113,6 +113,10 @@ with tf.Graph().as_default():
 
 
 def recog_face(frame):
+    # open again
+    with open(classifier_filename_exp, 'rb') as infile:
+        (model, class_names) = pickle.load(infile,encoding='latin1')
+    #############
     face_list = []
     if frame.ndim == 2:
         frame = facenet.to_rgb(frame)

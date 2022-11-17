@@ -11,6 +11,8 @@ import operator
 import save_file
 
 from utils import ResponseData, UserIdentity
+import data_proccess_runner
+import train_main_runner
 
 
 UPLOAD_FOLDER = '/path/to/the/uploads'
@@ -113,7 +115,7 @@ def getResponseData(base64List):
         if len(faceStatus) > 0:
             cnt += 1
             maskCnt += faceStatus[0].face_item.mask == True
-            glassesCnt += faceStatus[0].face_item.glasses == True
+            glassesCnt += faceStatus[0].face_item.glasses    == True
             eyesCnt += faceStatus[0].face_detection.has_eyes() == True
             mouthCnt += faceStatus[0].face_detection.has_mouth() == True
             noseCnt += faceStatus[0].face_detection.has_nose() == True
@@ -167,8 +169,8 @@ def getResponseData(base64List):
     return ResponseData(validImage, message)
 
 def train_data():
-    import data_proccess
-    import train_main
+    data_proccess_runner.run()
+    train_main_runner.run()
 
 ########################################################################################################
 
@@ -248,10 +250,10 @@ def upload_face():
             userId = userImage["username"]
             base64List = userImage["base64List"]
             print(userId)
-            # save_file.create_dir(userId, base64List)
-            # train_data()
+            save_file.create_dir(userId, base64List)
+            train_data()
+            return {'hello':'world'}, 200
             
-            return {"hello":"world"}, 200
     return "Bad request", 400
 
 app.run(debug=True, host='0.0.0.0', port=5050)
