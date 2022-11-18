@@ -114,6 +114,8 @@ with tf.Graph().as_default():
 
 def recog_face(frame):
     # open again
+    HumanNames = os.listdir(train_img)
+    HumanNames.sort()
     with open(classifier_filename_exp, 'rb') as infile:
         (model, class_names) = pickle.load(infile,encoding='latin1')
     #############
@@ -182,8 +184,8 @@ def recog_face(frame):
                     accuracy = 0
                     current_face = FaceRecognize(id ,id , accuracy, DetectionArea(Poi(xmin, ymin-20), Poi(xmax, ymin-2)))
                     face_list.append(current_face)
-            except:   
-                print("error")
+            except Exception as e:   
+                print("error {}".format(str(e)))
             
             break
     return face_list
