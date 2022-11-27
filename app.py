@@ -81,10 +81,10 @@ def recogFace(base64List):
     return userIdentity
 
 def getResponseData(base64List):
-    removeMessagePattern = "Pls remove {} on you face"
+    removeMessagePattern = "Pls take off {} on you face"
     cantDetectMessagePattern = "I can't see your {}"
     message = ""
-    goodMessage = "Naice face"
+    goodMessage = "Good face"
 
     maskMessage = "mask"
     glassesMessage = "glasses"
