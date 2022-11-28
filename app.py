@@ -83,6 +83,7 @@ def recogFace(base64List):
 def getResponseData(base64List):
     removeMessagePattern = "Pls take off {} on you face"
     cantDetectMessagePattern = "I can't see your {}"
+    faceNotFoundMessage = "I can't see your face"
     message = ""
     goodMessage = "Good face"
 
@@ -122,45 +123,48 @@ def getResponseData(base64List):
             if faceStatus[0].good_face():
                 validImage.append(base64)
 
-    maskRatio = maskCnt / cnt
-    glassesRatio = glassesCnt / cnt
-    eyesRatio = eyesCnt / cnt
-    mouthRatio = mouthCnt / cnt
-    noseRatio = noseCnt / cnt
+    if cnt > 0:
+        maskRatio = maskCnt / cnt
+        glassesRatio = glassesCnt / cnt
+        eyesRatio = eyesCnt / cnt
+        mouthRatio = mouthCnt / cnt
+        noseRatio = noseCnt / cnt
 
-    feature = []
-    if eyesRatio < eyesThreshold:
-        feature.append(eyesMessage)
-    if mouthRatio < mouthThreshold:
-        feature.append(mouthMessage)
-    if noseRatio < noseThreshold:
-        feature.append(noseMessage)
-    
-    item = []
+        feature = []
+        if eyesRatio < eyesThreshold:
+            feature.append(eyesMessage)
+        if mouthRatio < mouthThreshold:
+            feature.append(mouthMessage)
+        if noseRatio < noseThreshold:
+            feature.append(noseMessage)
+        
+        item = []
 
-    if maskRatio >= maskThreshold:
-        item.append(maskMessage)
-    if glassesRatio >= glassesThreshold:
-        item.append(glassesMessage)
-    
-    found = False
+        if maskRatio >= maskThreshold:
+            item.append(maskMessage)
+        if glassesRatio >= glassesThreshold:
+            item.append(glassesMessage)
+        
+        found = False
 
-    if len(feature) > 0:
-        delimiter = ""
-        if(len(message) > 0): 
-            delimiter = " and "
-        message = message + delimiter + cantDetectMessagePattern.format(', '.join(feature))
-        found = True
+        if len(feature) > 0:
+            delimiter = ""
+            if(len(message) > 0): 
+                delimiter = " and "
+            message = message + delimiter + cantDetectMessagePattern.format(', '.join(feature))
+            found = True
 
-    if len(item) > 0:
-        delimiter = ""
-        if(len(message) > 0): 
-            delimiter = " and "
-        message = message + delimiter + removeMessagePattern.format(', '.join(item))
-        found = True
+        if len(item) > 0:
+            delimiter = ""
+            if(len(message) > 0): 
+                delimiter = " and "
+            message = message + delimiter + removeMessagePattern.format(', '.join(item))
+            found = True
 
-    if not found:
-        message = goodMessage
+        if not found:
+            message = goodMessage
+    else:
+        message = faceNotFoundMessage
 
     print('cnt : ', cnt)
     print("mask cnt : {}".format(maskCnt))

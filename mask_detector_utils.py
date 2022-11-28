@@ -18,14 +18,19 @@ from load_model import faceNet, confidence_threshold
 #     cv2.__file__) + "/data/haarcascade_frontalface_default.xml"
 # cascPatheyes = os.path.dirname(
 #     cv2.__file__) + "/data/haarcascade_eye_tree_eyeglasses.xml"
-cascPatheyes = os.path.dirname(
-    cv2.__file__) + "/data/haarcascade_eye.xml"
-cascMouth = os.path.dirname(
-    cv2.__file__) + "/data/haarcascade_mcs_mouth.xml"
-cascEyes = os.path.dirname(
-    cv2.__file__) + "/data/haarcascade_eye.xml"
-cascNose = os.path.dirname(
-    cv2.__file__) + "/data/haarcascade_mcs_nose.xml"
+# cascPatheyes = os.path.dirname(
+#     cv2.__file__) + "/data/haarcascade_eye.xml"
+# cascMouth = os.path.dirname(
+#     cv2.__file__) + "/data/haarcascade_mcs_mouth.xml"
+# cascEyes = os.path.dirname(
+#     cv2.__file__) + "/data/haarcascade_eye.xml"
+# cascNose = os.path.dirname(
+#     cv2.__file__) + "/data/haarcascade_mcs_nose.xml"
+
+cascPatheyes = "haarcascade_eye.xml"
+cascMouth = "haarcascade_mcs_mouth.xml"
+cascEyes = "haarcascade_eye.xml"
+cascNose = "haarcascade_mcs_nose.xml"
 
 data = []
 
@@ -127,6 +132,7 @@ def detect(frame):
 
             face_frame = frame[y:y+h,x:x+w]
             roi_gray = gray[y:y+h,x:x+w]
+            roi_gray_eyes = gray[y:y+h,x:x+w]
             roi_gray = cv2.equalizeHist(roi_gray)
 
             # convert for detecting glasses
@@ -164,11 +170,14 @@ def detect(frame):
             face_detection.set_nose_area(nose_area_list)
             
             # eyes detection
-            eyes_rects = eyesCascade.detectMultiScale(roi_gray)
+            eyes_rects = eyesCascade.detectMultiScale(roi_gray_eyes)
             eyes_area_list = []
+            print('############################### len : {}'.format(len(eyes_rects)))
             for (ex,ey,ew,eh) in eyes_rects:
                 eye_area = DetectionArea(Poi(ex+x,ey+y),Poi(ex+ew+x,ey+eh+y))
                 eyes_area_list.append(eye_area)
+                if len(eyes_area_list) == 2:
+                    break
             face_detection.set_eyes_area(eyes_area_list)
             
             

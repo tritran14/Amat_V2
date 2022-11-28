@@ -32,7 +32,7 @@ class FaceDetection:
     def set_eyes_area(self, eyes_area_list):
         self.eyes_area_list = eyes_area_list
     def has_eyes(self):
-        return len(self.eyes_area_list) >= 2
+        return len(self.eyes_area_list) == 2
     
     def valid_face(self):
         return self.has_eyes() and self.has_mouth() and self.has_nose()
