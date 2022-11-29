@@ -1,15 +1,5 @@
 env
-app/__pycache__
-app/modules/controller/__pycache__
-# mask_detector.model
-# mask_recog.h5
-# maskDetectionModel.h5
-# masknet.h5
+__pycache__
 data/
-aligned_img/
-test_image_face/
-train_img/
 node_modules/
-class/
-model/
 facenet_keras.h5

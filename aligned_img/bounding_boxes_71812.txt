@@ -1,0 +1,10 @@
+./aligned_img\tri\tri_0.png 196 135 424 438
+./aligned_img\tri\tri_1.png 196 138 423 437
+./aligned_img\tri\tri_2.png 192 131 421 440
+./aligned_img\tri\tri_3.png 192 133 419 441
+./aligned_img\tri\tri_4.png 194 138 423 440
+./aligned_img\tri\tri_5.png 193 137 418 436
+./aligned_img\tri\tri_6.png 192 134 420 444
+./aligned_img\tri\tri_7.png 192 134 419 446
+./aligned_img\tri\tri_8.png 194 138 423 437
+./aligned_img\tri\tri_9.png 192 132 421 443
